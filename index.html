@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>ศูนย์กลางแจ้งขอความช่วยเหลือ น้ำท่วมภาคใต้</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- ใช้ Bootstrap จาก CDN เพื่อให้สวยขึ้นหน่อย -->
   <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -21,6 +20,7 @@
 
   <div class="container mb-5">
     <div class="row">
+
       <!-- ฟอร์มแจ้งขอความช่วยเหลือ -->
       <div class="col-lg-5 mb-4">
         <div class="card shadow-sm">
@@ -41,7 +41,7 @@
 
               <div class="mb-2">
                 <label class="form-label">จังหวัด / อำเภอ / ตำบล</label>
-                <input type="text" class="form-control" id="area" placeholder="เช่น ต.บางแก้ว อ.หาดใหญ่ จ.สงขลา" required />
+                <input type="text" class="form-control" id="area" required />
               </div>
 
               <div class="mb-2">
@@ -50,12 +50,13 @@
               </div>
 
               <div class="mb-2">
-                <label class="form-label">ลิงก์พิกัดแผนที่ (Google Maps) หรือ ละติจูด,ลองจิจูด</label>
-                <input type="text" class="form-control" id="locationLink" placeholder="วางลิงก์ Google Maps หรือพิกัด"/>
+                <label class="form-label">ลิงก์พิกัดแผนที่ (Google Maps)</label>
+                <input type="text" class="form-control" id="locationLink" />
               </div>
 
               <hr />
 
+              <!-- จำนวนคนในบ้าน -->
               <div class="mb-2">
                 <label class="form-label">จำนวนคนในบ้าน</label>
                 <div class="row g-2">
@@ -93,33 +94,34 @@
                 </select>
               </div>
 
+              <!-- ความช่วยเหลือที่ต้องการ -->
               <div class="mb-2">
                 <label class="form-label">ความช่วยเหลือที่ต้องการ (เลือกได้หลายข้อ)</label>
                 <div class="form-check">
-                  <input class="form-check-input" type="checkbox" value="อาหารแห้ง" id="needFood">
+                  <input class="form-check-input" type="checkbox" id="needFood">
                   <label class="form-check-label" for="needFood">อาหารแห้ง/อาหารพร้อมทาน</label>
                 </div>
                 <div class="form-check">
-                  <input class="form-check-input" type="checkbox" value="น้ำดื่ม" id="needWater">
+                  <input class="form-check-input" type="checkbox" id="needWater">
                   <label class="form-check-label" for="needWater">น้ำดื่ม</label>
                 </div>
                 <div class="form-check">
-                  <input class="form-check-input" type="checkbox" value="ยาและเวชภัณฑ์" id="needMedicine">
+                  <input class="form-check-input" type="checkbox" id="needMedicine">
                   <label class="form-check-label" for="needMedicine">ยาและเวชภัณฑ์</label>
                 </div>
                 <div class="form-check">
-                  <input class="form-check-input" type="checkbox" value="เรือ / พาหนะช่วยเหลือ" id="needBoat">
+                  <input class="form-check-input" type="checkbox" id="needBoat">
                   <label class="form-check-label" for="needBoat">เรือ / พาหนะช่วยเหลือ</label>
                 </div>
                 <div class="form-check">
-                  <input class="form-check-input" type="checkbox" value="อพยพออกจากพื้นที่" id="needEvac">
+                  <input class="form-check-input" type="checkbox" id="needEvac">
                   <label class="form-check-label" for="needEvac">อพยพออกจากพื้นที่</label>
                 </div>
               </div>
 
               <div class="mb-3">
                 <label class="form-label">รายละเอียดเพิ่มเติม</label>
-                <textarea class="form-control" id="detail" rows="2" placeholder="เช่น ผู้ป่วยติดเตียง 1 คน น้ำท่วมเข้าบ้านแล้ว รถเข้าไม่ถึง"></textarea>
+                <textarea class="form-control" id="detail" rows="2"></textarea>
               </div>
 
               <button type="submit" class="btn btn-danger w-100">
@@ -130,33 +132,41 @@
         </div>
       </div>
 
-      <!-- รายการคำขอความช่วยเหลือ -->
+      <!-- ฝั่งขวา: สรุป + รายการคำขอ -->
       <div class="col-lg-7 mb-4">
+        <div class="card shadow-sm mb-3">
+          <div class="card-header bg-info text-white">
+            สรุปภาพรวมการขอความช่วยเหลือ
+          </div>
+          <div class="card-body" id="summary">
+            <p class="text-muted mb-0">กำลังโหลดข้อมูลสรุป...</p>
+          </div>
+        </div>
+
         <div class="card shadow-sm">
           <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
             <span>รายการขอความช่วยเหลือ</span>
             <select id="statusFilter" class="form-select form-select-sm" style="width:auto;">
               <option value="all">แสดงทั้งหมด</option>
-              <option value="pending">เฉพาะรอความช่วยเหลือ</option>
-              <option value="done">เฉพาะได้รับความช่วยเหลือแล้ว</option>
+              <option value="pending">รอความช่วยเหลือ</option>
+              <option value="helping">กำลังให้ความช่วยเหลือ</option>
+              <option value="done">ได้รับความช่วยเหลือแล้ว</option>
             </select>
           </div>
           <div class="card-body">
-            <div id="requestsList" class="small">
-              <!-- รายการจะถูก generate ด้วย JavaScript -->
-            </div>
+            <div id="requestsList" class="small"></div>
           </div>
         </div>
       </div>
+
     </div>
   </div>
 
-    <!-- Firebase SDK -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
   <script>
-    // เอา config ของคุณจาก Firebase มาแปะตรงนี้
     const firebaseConfig = {
       apiKey: "AIzaSyBB7AlpPEAN2eAtT2u2ARmdUA447MliS1E",
       authDomain: "thai-flood-relief.firebaseapp.com",
@@ -166,40 +176,157 @@
       appId: "1:1037111083170:web:f7a06ba01e8ab916bcd7fb"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
   </script>
 
-    <script>
-    // เก็บข้อมูลคำขอในตัวแปร (จะ sync กับ Firestore ผ่าน real-time listener)
+  <script>
     let requestsCache = [];
+
+    function getMyHelperPhone() {
+      return localStorage.getItem("myHelperPhone") || "";
+    }
+
+    function renderSummary() {
+      const summaryEl = document.getElementById("summary");
+      if (!summaryEl) return;
+
+      if (requestsCache.length === 0) {
+        summaryEl.innerHTML = "<p class='text-muted mb-0'>ยังไม่มีข้อมูลสรุป</p>";
+        return;
+      }
+
+      const today = new Date();
+      const todayStr = today.toISOString().slice(0, 10);
+
+      let total = requestsCache.length;
+      let pending = 0, helping = 0, done = 0;
+      let todayTotal = 0, todayPending = 0, todayDone = 0;
+
+      const byDate = {};
+
+      requestsCache.forEach(r => {
+        if (r.status === "รอความช่วยเหลือ") pending++;
+        else if (r.status === "มีอาสาช่วยแล้ว") helping++;
+        else if (r.status === "ได้รับความช่วยเหลือแล้ว") done++;
+
+        if (r.createdAtDate === todayStr) {
+          todayTotal++;
+          if (r.status === "รอความช่วยเหลือ" || r.status === "มีอาสาช่วยแล้ว") todayPending++;
+          if (r.status === "ได้รับความช่วยเหลือแล้ว") todayDone++;
+        }
+
+        if (r.createdAtDate) {
+          if (!byDate[r.createdAtDate]) {
+            byDate[r.createdAtDate] = { total: 0, done: 0 };
+          }
+          byDate[r.createdAtDate].total++;
+          if (r.status === "ได้รับความช่วยเหลือแล้ว") {
+            byDate[r.createdAtDate].done++;
+          }
+        }
+      });
+
+      const sortedDates = Object.keys(byDate).sort().reverse().slice(0, 7);
+
+      let dailyRows = "";
+      sortedDates.forEach(d => {
+        dailyRows += `
+          <tr>
+            <td>${d}</td>
+            <td>${byDate[d].total}</td>
+            <td>${byDate[d].done}</td>
+          </tr>
+        `;
+      });
+
+      summaryEl.innerHTML = `
+        <div class="row mb-3">
+          <div class="col-6 col-md-3">
+            <div class="border rounded p-2 text-center">
+              <div class="small text-muted">ทั้งหมด</div>
+              <div class="fs-5 fw-bold">${total}</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="border rounded p-2 text-center">
+              <div class="small text-muted">รอความช่วยเหลือ</div>
+              <div class="fs-5 fw-bold text-danger">${pending}</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3 mt-2 mt-md-0">
+            <div class="border rounded p-2 text-center">
+              <div class="small text-muted">กำลังช่วย</div>
+              <div class="fs-5 fw-bold text-warning">${helping}</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3 mt-2 mt-md-0">
+            <div class="border rounded p-2 text-center">
+              <div class="small text-muted">ช่วยแล้ว</div>
+              <div class="fs-5 fw-bold text-success">${done}</div>
+            </div>
+          </div>
+        </div>
+
+        <h6 class="fw-bold">วันนี้ (${todayStr})</h6>
+        <p class="mb-2">
+          เคสใหม่วันนี้: <strong>${todayTotal}</strong> เคส<br/>
+          ยังรอ/กำลังช่วย: <strong>${todayPending}</strong> เคส<br/>
+          ช่วยเสร็จแล้ววันนี้: <strong>${todayDone}</strong> เคส
+        </p>
+
+        <h6 class="fw-bold mt-3">สรุปย้อนหลัง (7 วันล่าสุด)</h6>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>วันที่</th>
+                <th>จำนวนเคส</th>
+                <th>เคสที่ช่วยเสร็จ</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${dailyRows || `<tr><td colspan="3" class="text-muted text-center">ยังไม่มีข้อมูลย้อนหลัง</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
 
     function renderRequests() {
       const container = document.getElementById("requestsList");
       const filter = document.getElementById("statusFilter").value;
+      const myHelperPhone = getMyHelperPhone();
 
       container.innerHTML = "";
 
       const filtered = requestsCache.filter(r => {
         if (filter === "pending") return r.status === "รอความช่วยเหลือ";
+        if (filter === "helping") return r.status === "มีอาสาช่วยแล้ว";
         if (filter === "done") return r.status === "ได้รับความช่วยเหลือแล้ว";
         return true;
       });
 
       if (filtered.length === 0) {
-        container.innerHTML = "<p class='text-muted'>ยังไม่มีรายการ หรือไม่พบข้อมูลตามตัวกรอง</p>";
+        container.innerHTML = "<p class='text-muted'>ยังไม่มีข้อมูล</p>";
         return;
       }
 
       filtered.forEach((r) => {
-        const totalPeople =
-          r.children + r.adults + r.elderly + r.patients;
+        const totalPeople = r.children + r.adults + r.elderly + r.patients;
 
         const statusBadge =
           r.status === "รอความช่วยเหลือ"
             ? "<span class='badge bg-danger'>รอความช่วยเหลือ</span>"
+            : r.status === "มีอาสาช่วยแล้ว"
+            ? "<span class='badge bg-warning text-dark'>กำลังให้ความช่วยเหลือ</span>"
             : "<span class='badge bg-success'>ได้รับความช่วยเหลือแล้ว</span>";
+
+        const helperTxt = r.helperName
+          ? `ผู้ช่วย: <strong>${r.helperName}</strong> (${r.helperPhone})`
+          : "<span class='text-muted'>ยังไม่มีผู้ช่วย</span>";
+
+        const canToggle = (!r.helperPhone || r.helperPhone === myHelperPhone);
 
         const card = document.createElement("div");
         card.className = "border rounded p-2 mb-2";
@@ -209,15 +336,27 @@
             <div>
               <strong>${statusBadge} พื้นที่: ${r.area}</strong><br/>
               ผู้แจ้ง: ${r.reporterName} | โทร: ${r.phone}<br/>
-              คนในบ้านรวม ~ <strong>${totalPeople}</strong> คน
-              (${r.children} เด็ก, ${r.adults} ผู้ใหญ่, ${r.elderly} ผู้สูงอายุ, ${r.patients} ผู้ป่วย)
+              ${helperTxt}<br/>
+              <small>รวม ${totalPeople} คน</small>
             </div>
+
             <div class="text-end">
-              <button class="btn btn-sm btn-outline-secondary mb-1" onclick="toggleStatus('${r.id}')">
-                เปลี่ยนสถานะ
-              </button><br/>
+              ${
+                r.helperPhone
+                  ? ""
+                  : `<button class="btn btn-sm btn-outline-success mb-1" onclick="takeRequest('${r.id}')">
+                      รับเคสนี้
+                    </button><br/>`
+              }
+
               <button class="btn btn-sm btn-outline-primary" onclick="showDetail('${r.id}')">
                 รายละเอียด
+              </button><br/>
+
+              <button class="btn btn-sm btn-outline-secondary mt-1"
+                ${canToggle ? "" : "disabled"}
+                onclick="toggleStatus('${r.id}')">
+                เปลี่ยนสถานะ
               </button>
             </div>
           </div>
@@ -227,55 +366,84 @@
       });
     }
 
-    function toggleStatus(id) {
-      const docRef = db.collection("requests").doc(id);
-      const current = requestsCache.find(r => r.id === id);
-      if (!current) return;
-      const newStatus =
-        current.status === "รอความช่วยเหลือ"
-          ? "ได้รับความช่วยเหลือแล้ว"
-          : "รอความช่วยเหลือ";
-      docRef.update({ status: newStatus, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    async function takeRequest(id) {
+      const name = prompt("ชื่อผู้ให้ความช่วยเหลือ:");
+      if (!name) return;
+
+      const phone = prompt("เบอร์โทร:");
+      if (!phone) return;
+
+      const note = prompt("หมายเหตุเพิ่มเติม (ถ้ามี):") || "";
+
+      localStorage.setItem("myHelperPhone", phone);
+
+      await db.collection("requests").doc(id).update({
+        helperName: name,
+        helperPhone: phone,
+        helperNote: note,
+        status: "มีอาสาช่วยแล้ว",
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
     }
 
     function showDetail(id) {
       const r = requestsCache.find(x => x.id === id);
       if (!r) return;
 
-      const needsText = r.needs && r.needs.length > 0 ? r.needs.join(", ") : "ไม่ระบุ";
+      const needsText = r.needs && r.needs.length ? r.needs.join(", ") : "-";
 
       alert(
-        [
-          `สถานะ: ${r.status}`,
-          `ผู้แจ้ง: ${r.reporterName}`,
-          `เบอร์ติดต่อ: ${r.phone}`,
-          `พื้นที่: ${r.area}`,
-          `ที่อยู่/พิกัด: ${r.address}`,
-          r.locationLink ? `ลิงก์แผนที่: ${r.locationLink}` : "",
-          `ระดับน้ำท่วม: ${r.waterLevel}`,
-          `เด็ก: ${r.children}, ผู้ใหญ่: ${r.adults}, ผู้สูงอายุ: ${r.elderly}, ผู้ป่วย: ${r.patients}, สัตว์เลี้ยง: ${r.pets}`,
-          `ความต้องการ: ${needsText}`,
-          `รายละเอียดเพิ่มเติม: ${r.detail || "-"}`
-        ].filter(Boolean).join("\n")
+`สถานะ: ${r.status}
+ผู้แจ้ง: ${r.reporterName}
+เบอร์ติดต่อ: ${r.phone}
+ผู้ช่วย: ${r.helperName || "-"} (${r.helperPhone || "-"})
+
+ที่อยู่: ${r.address}
+พื้นที่: ${r.area}
+พิกัด: ${r.locationLink || "-"}
+
+รายละเอียด: ${r.detail || "-"}
+ความต้องการ: ${needsText}`
       );
     }
 
-    // ส่งฟอร์ม -> เพิ่ม document ใหม่ใน Firestore
+    function toggleStatus(id) {
+      const r = requestsCache.find(x => x.id === id);
+      if (!r) return;
+
+      const myPhone = getMyHelperPhone();
+
+      if (r.helperPhone && r.helperPhone !== myPhone) {
+        alert("เฉพาะผู้ที่รับเคสนี้เท่านั้นที่เปลี่ยนสถานะได้");
+        return;
+      }
+
+      const newStatus =
+        r.status === "ได้รับความช่วยเหลือแล้ว"
+          ? "รอความช่วยเหลือ"
+          : "ได้รับความช่วยเหลือแล้ว";
+
+      db.collection("requests").doc(id).update({
+        status: newStatus,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
     document.getElementById("helpForm").addEventListener("submit", async function (e) {
       e.preventDefault();
 
-      const reporterName = document.getElementById("reporterName").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const area = document.getElementById("area").value.trim();
-      const address = document.getElementById("address").value.trim();
-      const locationLink = document.getElementById("locationLink").value.trim();
-      const children = parseInt(document.getElementById("children").value || "0");
-      const adults = parseInt(document.getElementById("adults").value || "0");
-      const elderly = parseInt(document.getElementById("elderly").value || "0");
-      const patients = parseInt(document.getElementById("patients").value || "0");
-      const pets = parseInt(document.getElementById("pets").value || "0");
-      const waterLevel = document.getElementById("waterLevel").value;
-      const detail = document.getElementById("detail").value.trim();
+      const reporterNameVal = document.getElementById("reporterName").value.trim();
+      const phoneVal = document.getElementById("phone").value.trim();
+      const areaVal = document.getElementById("area").value.trim();
+      const addressVal = document.getElementById("address").value.trim();
+      const locationLinkVal = document.getElementById("locationLink").value.trim();
+      const childrenVal = parseInt(document.getElementById("children").value || "0");
+      const adultsVal = parseInt(document.getElementById("adults").value || "0");
+      const elderlyVal = parseInt(document.getElementById("elderly").value || "0");
+      const patientsVal = parseInt(document.getElementById("patients").value || "0");
+      const petsVal = parseInt(document.getElementById("pets").value || "0");
+      const waterLevelVal = document.getElementById("waterLevel").value;
+      const detailVal = document.getElementById("detail").value.trim();
 
       const needs = [];
       if (document.getElementById("needFood").checked) needs.push("อาหารแห้ง/อาหารพร้อมทาน");
@@ -285,46 +453,54 @@
       if (document.getElementById("needEvac").checked) needs.push("อพยพออกจากพื้นที่");
 
       await db.collection("requests").add({
-        reporterName,
-        phone,
-        area,
-        address,
-        locationLink,
-        children,
-        adults,
-        elderly,
-        patients,
-        pets,
-        waterLevel,
+        reporterName: reporterNameVal,
+        phone: phoneVal,
+        area: areaVal,
+        address: addressVal,
+        locationLink: locationLinkVal,
+        children: childrenVal,
+        adults: adultsVal,
+        elderly: elderlyVal,
+        patients: patientsVal,
+        pets: petsVal,
+        waterLevel: waterLevelVal,
         needs,
-        detail,
-
-        // เพิ่มบรรทัดพวกนี้เข้ามา เพื่อเตรียมช่องให้ผู้ช่วย
-    helperName: "",
-    helperPhone: "",
-    helperNote: "",
-        
+        detail: detailVal,
+        helperName: "",
+        helperPhone: "",
+        helperNote: "",
         status: "รอความช่วยเหลือ",
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      alert("บันทึกคำขอความช่วยเหลือเรียบร้อยแล้ว ขอบคุณค่ะ");
+      alert("ส่งคำขอเรียบร้อยแล้ว ขอบคุณค่ะ");
       e.target.reset();
     });
 
-    document.getElementById("statusFilter").addEventListener("change", renderRequests);
+    document.getElementById("statusFilter").addEventListener("change", function () {
+      renderRequests();
+    });
 
-    // สมัคร real-time listener จาก Firestore
-    db.collection("requests").orderBy("createdAt", "desc")
-      .onSnapshot((snapshot) => {
-        requestsCache = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
+    db.collection("requests")
+      .orderBy("createdAt", "desc")
+      .onSnapshot(snap => {
+        requestsCache = snap.docs.map(d => {
+          const data = d.data();
+          let createdAtDate = "";
+          if (data.createdAt && data.createdAt.toDate) {
+            createdAtDate = data.createdAt.toDate().toISOString().slice(0, 10);
+          }
+          return {
+            id: d.id,
+            ...data,
+            createdAtDate
+          };
+        });
+        renderSummary();
         renderRequests();
       });
   </script>
+
 </body>
 </html>
-
