@@ -151,27 +151,37 @@
     </div>
   </div>
 
+    <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
   <script>
-    // เก็บข้อมูลใน localStorage เพื่อให้รีเฟรชแล้วยังอยู่ (ต้นแบบ)
-    const STORAGE_KEY = "flood_help_requests";
+    // เอา config ของคุณจาก Firebase มาแปะตรงนี้
+    const firebaseConfig = {
+      apiKey: "AIzaSyBB7AlpPEAN2eAtT2u2ARmdUA447MliS1E",
+      authDomain: "thai-flood-relief.firebaseapp.com",
+      projectId: "thai-flood-relief",
+      storageBucket: "thai-flood-relief.firebasestorage.app",
+      messagingSenderId: "1037111083170",
+      appId: "1:1037111083170:web:f7a06ba01e8ab916bcd7fb"
+    };
 
-    function loadRequests() {
-      const data = localStorage.getItem(STORAGE_KEY);
-      return data ? JSON.parse(data) : [];
-    }
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
 
-    function saveRequests(requests) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(requests));
-    }
+    <script>
+    // เก็บข้อมูลคำขอในตัวแปร (จะ sync กับ Firestore ผ่าน real-time listener)
+    let requestsCache = [];
 
     function renderRequests() {
       const container = document.getElementById("requestsList");
-      const requests = loadRequests();
       const filter = document.getElementById("statusFilter").value;
 
       container.innerHTML = "";
 
-      const filtered = requests.filter(r => {
+      const filtered = requestsCache.filter(r => {
         if (filter === "pending") return r.status === "รอความช่วยเหลือ";
         if (filter === "done") return r.status === "ได้รับความช่วยเหลือแล้ว";
         return true;
@@ -182,7 +192,7 @@
         return;
       }
 
-      filtered.forEach((r, index) => {
+      filtered.forEach((r) => {
         const totalPeople =
           r.children + r.adults + r.elderly + r.patients;
 
@@ -203,10 +213,10 @@
               (${r.children} เด็ก, ${r.adults} ผู้ใหญ่, ${r.elderly} ผู้สูงอายุ, ${r.patients} ผู้ป่วย)
             </div>
             <div class="text-end">
-              <button class="btn btn-sm btn-outline-secondary mb-1" onclick="toggleStatus(${r.id})">
+              <button class="btn btn-sm btn-outline-secondary mb-1" onclick="toggleStatus('${r.id}')">
                 เปลี่ยนสถานะ
               </button><br/>
-              <button class="btn btn-sm btn-outline-primary" onclick="showDetail(${r.id})">
+              <button class="btn btn-sm btn-outline-primary" onclick="showDetail('${r.id}')">
                 รายละเอียด
               </button>
             </div>
@@ -218,25 +228,21 @@
     }
 
     function toggleStatus(id) {
-      const requests = loadRequests();
-      const idx = requests.findIndex(r => r.id === id);
-      if (idx === -1) return;
-
-      requests[idx].status =
-        requests[idx].status === "รอความช่วยเหลือ"
+      const docRef = db.collection("requests").doc(id);
+      const current = requestsCache.find(r => r.id === id);
+      if (!current) return;
+      const newStatus =
+        current.status === "รอความช่วยเหลือ"
           ? "ได้รับความช่วยเหลือแล้ว"
           : "รอความช่วยเหลือ";
-
-      saveRequests(requests);
-      renderRequests();
+      docRef.update({ status: newStatus, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
     }
 
     function showDetail(id) {
-      const requests = loadRequests();
-      const r = requests.find(x => x.id === id);
+      const r = requestsCache.find(x => x.id === id);
       if (!r) return;
 
-      const needsText = r.needs.length > 0 ? r.needs.join(", ") : "ไม่ระบุ";
+      const needsText = r.needs && r.needs.length > 0 ? r.needs.join(", ") : "ไม่ระบุ";
 
       alert(
         [
@@ -254,8 +260,8 @@
       );
     }
 
-    // ส่งฟอร์ม
-    document.getElementById("helpForm").addEventListener("submit", function (e) {
+    // ส่งฟอร์ม -> เพิ่ม document ใหม่ใน Firestore
+    document.getElementById("helpForm").addEventListener("submit", async function (e) {
       e.preventDefault();
 
       const reporterName = document.getElementById("reporterName").value.trim();
@@ -278,11 +284,7 @@
       if (document.getElementById("needBoat").checked) needs.push("เรือ / พาหนะช่วยเหลือ");
       if (document.getElementById("needEvac").checked) needs.push("อพยพออกจากพื้นที่");
 
-      const requests = loadRequests();
-      const newId = requests.length ? Math.max(...requests.map(r => r.id)) + 1 : 1;
-
-      const newRequest = {
-        id: newId,
+      await db.collection("requests").add({
         reporterName,
         phone,
         area,
@@ -297,21 +299,25 @@
         needs,
         detail,
         status: "รอความช่วยเหลือ",
-        createdAt: new Date().toISOString()
-      };
-
-      requests.push(newRequest);
-      saveRequests(requests);
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
 
       alert("บันทึกคำขอความช่วยเหลือเรียบร้อยแล้ว ขอบคุณค่ะ");
       e.target.reset();
-      renderRequests();
     });
 
     document.getElementById("statusFilter").addEventListener("change", renderRequests);
 
-    // load initial
-    renderRequests();
+    // สมัคร real-time listener จาก Firestore
+    db.collection("requests").orderBy("createdAt", "desc")
+      .onSnapshot((snapshot) => {
+        requestsCache = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        renderRequests();
+      });
   </script>
 </body>
 </html>
